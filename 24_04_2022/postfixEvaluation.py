@@ -1,5 +1,5 @@
-def calculate(expr: str) -> int:
-    stack: list[int] = []
+def calculate(expr) :
+    stack = []
     tokens = expr.split(" ")
     for token in tokens:
         if token.isnumeric():
@@ -14,15 +14,14 @@ def calculate(expr: str) -> int:
             raise ValueError("unknown token {0} found".format(token))
 
 
-def compute(left: int, op: str, right: int) -> int:
-    match op:
-        case "+":
-            return left + right
-        case "-":
-            return left - right
-        case "*":
-            return left * right
-        case "/":
-            return left // right
-        case _:
-            raise ValueError("op {0} unknown".format(op))
+def compute(left, op, right):
+    if op == '+':
+        return left + right
+    elif op == '-':
+        return left - right
+    elif op == '*':
+        return left * right
+    elif op == '/':
+        return left // right
+    else:
+        raise ValueError("unknown operator {0} found".format(op))
