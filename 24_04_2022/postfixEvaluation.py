@@ -1,6 +1,6 @@
-def evaluate(text: str) -> int:
+def calculate(expr: str) -> int:
     stack: list[int] = []
-    tokens = text.split(" ")
+    tokens = expr.split(" ")
     for token in tokens:
         if token.isnumeric():
             stack.append(int(token))
