@@ -1,0 +1,11 @@
+// Sweet Class Diagram
+// -------------------
+
+[SensorValue|value: double;time: Time]
+[Datastore|\<\<constructor\>\> Datastore(size: int);addValue(sv: SensorValue): void; getAverage(): double; getMax(): SensorValue; getMin(): SensorValue]
+
+[ControlSystem|\<\<constructor\>\> ControlSystem(size: int, min_threshold: double?, max_threshold: double?);addValue(sv: SensorValue): void throws Exception]
+
+[Datastore]^[ControlSystem]
+[Datastore]-.-[SensorValue]
+//[ControlSystem]-.-[SensorValue]

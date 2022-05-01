@@ -1,10 +1,16 @@
 import collections
+import math
 import statistics
+
 
 class SensorValue:
     def __init__(self, value, time):
         self.value = value
         self.time = time
+
+    def __repr__(self):
+        return f"SensorValue({self.value}, {self.time})"
+
 
 class Datastore:
     def __init__(self, max_size):
@@ -12,52 +18,54 @@ class Datastore:
 
     def addValue(self, sv):
         self.data.append(sv)
-    
+
     def getAverage(self):
         return statistics.mean((o.value for o in self.data))
 
     def getMax(self):
-        return max(self.temp_data, key=lambda x: x.value)
-    
+        return max(self.data, key=lambda x: x.value)
+
     def getMin(self):
-        return min(self.temp_data, key=lambda x: x.value)
-    
+        return min(self.data, key=lambda x: x.value)
+
     def printValue(self):
         print("==========================")
         print("Average:", self.getAverage())
         print("Max:", self.getMax())
         print("Min:", self.getMin())
-        
 
-class CollectorGuard(Collector):
-    def __init__(self, max_size, threshold):
+
+class ControlSystem(Datastore):
+    def __init__(self, max_size, min_threshold=-math.inf, max_threshold=math.inf):
         super().__init__(max_size)
-        self.threshold = threshold
-        
-    def addValue(self, temp, time):
-        if temp > self.threshold:
-            raise Exception("Value is too high")
-        super().addValue(temp, time)
+        self.min_threshold = min_threshold
+        self.max_threshold = max_threshold
+
+    def addValue(self, sv):
+        if not self.min_threshold <= sv.value <= self.max_threshold:
+            raise Exception(
+                f"Value: {sv.value} is outside of thresholds min: {self.min_threshold} and max: {self.max_threshold}")
+        super().addValue(sv)
+
 
 if __name__ == '__main__':
-    #c = CollectorGuard(5, 25)
-    c = Collector(5)
-
-    c.addValue(10, "20:00")
+    c = ControlSystem(5, min_threshold=5, max_threshold=25)
+    # c = Datastore(5)
+    c.addValue(SensorValue(10, "20:00"))
     c.printValue()
-    c.addValue(15, "20:01")
+    c.addValue(SensorValue(15, "20:01"))
     c.printValue()
-    c.addValue(20, "20:02")
+    c.addValue(SensorValue(20, "20:02"))
     c.printValue()
-    c.addValue(21, "20:03")
+    c.addValue(SensorValue(21, "20:03"))
     c.printValue()
-    c.addValue(22, "20:04")
+    c.addValue(SensorValue(22, "20:04"))
     c.printValue()
-    c.addValue(23, "20:05")
+    c.addValue(SensorValue(23, "20:05"))
     c.printValue()
-    c.addValue(24, "20:06")
+    c.addValue(SensorValue(24, "20:06"))
     c.printValue()
-    c.addValue(25, "20:07")
+    c.addValue(SensorValue(25, "20:07"))
     c.printValue()
-    c.addValue(26, "20:08")
+    c.addValue(SensorValue(26, "20:08"))
     c.printValue()
