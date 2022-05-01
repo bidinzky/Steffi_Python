@@ -20,13 +20,13 @@ class Datastore:
         self.data.append(sv)
 
     def getAverage(self):
-        return statistics.mean((o.value for o in self.data))
+        return statistics.mean((sv.value for sv in self.data))
 
     def getMax(self):
-        return max(self.data, key=lambda x: x.value)
+        return max(self.data, key=lambda sv: sv.value)
 
     def getMin(self):
-        return min(self.data, key=lambda x: x.value)
+        return min(self.data, key=lambda sv: sv.value)
 
     def printValue(self):
         print("==========================")
