@@ -1,4 +1,5 @@
 import csv
+import json
 import random
 from typing import List
 import abc
@@ -42,7 +43,7 @@ class ProtoBackPack(abc.ABC):
             else:
                 # not enough space, abort
                 break
-        return self.packed_items
+        return PackedBackPack(self.size, self.packed_items)
 
 
 class RandomBackPack(ProtoBackPack):
@@ -55,12 +56,25 @@ class OptimalBackPack(ProtoBackPack):
         return max(self.item_list, key=lambda li: li.size)
 
 
-backpack = RandomBackPack(11)
-backpack2 = OptimalBackPack(11)
+class PackedBackPack:
+    def __init__(self, max_size: float, items: List[BackPackItem]):
+        self.items = items
+        self.max_size = max_size
+        self.size = sum(sv.size for sv in items)
+
+    def __repr__(self):
+        return f"items: {self.items}\nsize: {self.size}"
+
+    def to_json(self):
+        return  json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+
+
+backpack = RandomBackPack(11.5)
+backpack2 = OptimalBackPack(11.5)
 packed = backpack.pack()
 packed2 = backpack2.pack()
 print(packed)
-print(sum((sv.size for sv in packed)))
+print(packed.to_json())
 print(packed2)
-print(sum((sv.size for sv in packed2)))
+print(packed2.to_json())
 
