@@ -1,0 +1,32 @@
+======
+TEST 1
+RandomBackpack
+	contains all items: True
+OptimalBackpack
+	contains all items: True
+======
+======
+TEST 2
+RandomBackpack
+	fill-rate: 59%
+OptimalBackpack
+	fill-rate: 100%
+======
+======
+TEST 3
+BackPack should be: [cereal_bar, waterbottle, snacks]
+RandomBackpack
+	 [2 -> cagoule: 150.0 False, 3 -> asthmainhaler: 50.0 False, 1 -> hipflask: 300.0 True, 3 -> cereal_bar: 100.0 True, 3 -> suncream: 40.0 False]
+OptimalBackpack
+	 [3 -> waterbottle: 1000.0 True, 3 -> snacks: 400.0 True, 3 -> cereal_bar: 100.0 True]
+======
+======
+TEST 4
+BackPack should be: [cereal_bar, waterbottle, snacks, inhaler]
+RandomBackpack
+	 [2 -> cagoule: 150.0 False, 3 -> suncream: 40.0 False, 1 -> binoculars: 500.0 False, 3 -> cereal_bar: 100.0 True, 3 -> snacks: 400.0 True, 2 -> sunglasses: 50.0 False, 3 -> asthmainhaler: 50.0 False]
+OptimalBackpack
+	 [3 -> waterbottle: 1000.0 True, 3 -> snacks: 400.0 True, 3 -> cereal_bar: 100.0 True, 3 -> asthmainhaler: 50.0 False]
+======
+
+Process finished with exit code 0
