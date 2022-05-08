@@ -1,13 +1,11 @@
 import csv
 import json
 import random
-from collections.abc import Iterable
 import abc
-from typing import List
 
 
 class Item:
-    def __init__(self, name: str, weight: float, is_food: bool, priority: int):
+    def __init__(self, name, weight, is_food, priority):
         self.name = name
         self.weight = weight
         self.is_food = is_food
@@ -18,7 +16,7 @@ class Item:
 
 
 class ListOfItems(list):
-    def __init__(self, i: Iterable[Item]):
+    def __init__(self, i):
         super().__init__(i)
 
     @staticmethod
@@ -38,11 +36,11 @@ class ListOfItems(list):
 
 
 class BackPack(abc.ABC):
-    def __init__(self, weight_limit: float, i: List[Item]):
+    def __init__(self, weight_limit, i):
         self.item_list = i
         self.used_weight = 0
         self.weight_limit = weight_limit
-        self.packed_items: List[Item] = []
+        self.packed_items = []
 
     @abc.abstractmethod
     def _get_next_item(self) -> Item:
@@ -51,7 +49,7 @@ class BackPack(abc.ABC):
     def pack(self):
         while self.used_weight < self.weight_limit and len(self.item_list) != 0:
             item = self._get_next_item()
-            if item.weight + self.used_weight <= self.weight_limit:
+            if item is not None and item.weight + self.used_weight <= self.weight_limit:
                 # still enough space in backpack
                 self.packed_items.append(item)
                 self.used_weight += item.weight
@@ -72,18 +70,14 @@ class RandomBackPack(BackPack):
 class OptimalBackPack(BackPack):
     def _get_next_item(self):
         # sort by priority and is_food
-        items_with_highest_priority = sorted(self.item_list, key=lambda i: (i.priority, not i.is_food))
+        items_with_priority = sorted(self.item_list, key=lambda i: (i.priority, i.is_food, i.weight), reverse=True)
         # now get the item with the highest weight that fits in the backpack
-        max_weight = 0
-        result = None
-        for i in items_with_highest_priority:
-            if i.weight > max_weight and i.weight + self.used_weight <= self.weight_limit:
-                max_weight = i.weight
-                result = i
+        items_with_priority_fits = filter(lambda i: i.weight + self.used_weight <= self.weight_limit, items_with_priority)
+        result = next(items_with_priority_fits, None)
         return result
 
 
-def test1_evaluateBP(name: str, bp: BackPack, item_list):
+def test1_evaluateBP(name, bp, item_list):
     print(f"{name}")
     print("\tfill-rate: {:.0%}".format(bp.used_weight / bp.weight_limit))
     print(f"\tcontains all items: {set(item_list) == set(bp.packed_items)}")
@@ -121,24 +115,25 @@ def test2():
 
 def test3():
     item_list = ListOfItems.loadFromCSV()
-    random_bp = RandomBackPack(2000, item_list.copy())
-    optimal_bp = OptimalBackPack(2000, item_list.copy())
+    random_bp = RandomBackPack(1500, item_list.copy())
+    optimal_bp = OptimalBackPack(1500, item_list.copy())
     random_bp.pack()
     optimal_bp.pack()
-    random_bp.getPackedItems().to_json("RandomBackpack.test2.json")
-    optimal_bp.getPackedItems().to_json("OptimalBackpack.test2.json")
+    random_bp.getPackedItems().to_json("RandomBackpack.test3.json")
+    optimal_bp.getPackedItems().to_json("OptimalBackpack.test3.json")
     print("======")
-    print("TEST 2")
-    print("RandomBackpack\n\tfill-rate: {:.0%}".format(random_bp.used_weight / random_bp.weight_limit))
-    print("OptimalBackpack\n\tfill-rate: {:.0%}".format(optimal_bp.used_weight / optimal_bp.weight_limit))
+    print("TEST 3")
+    print("BackPack should be: [cereal_bar, waterbottle, snacks]")
+    print(f"RandomBackpack\n\t {random_bp.getPackedItems()}")
+    print(f"OptimalBackpack\n\t {optimal_bp.getPackedItems()}")
     print("======")
 
 
 # Test 1: check if all items get put into the backpack if enough space
-test1()
+# test1()
 
 # Test 2: check with constrained weight limit how good the backpack gets filled
-test2()
+# test2()
 
 # Test 3: check if the backpack gets packed with the right priority
 test3()
