@@ -71,14 +71,12 @@ class RandomBackPack(BackPack):
 
 class OptimalBackPack(BackPack):
     def _get_next_item(self):
-        # sort by priority
-        items_with_highest_priority = sorted(self.item_list, key=lambda i: i.priority)
-        # now get all items that are food and if none exits non-food items
-        items_with_food_prioritized = sorted(items_with_highest_priority, key=lambda i: i.is_food, reverse=True)
+        # sort by priority and is_food
+        items_with_highest_priority = sorted(self.item_list, key=lambda i: (i.priority, not i.is_food))
         # now get the item with the highest weight that fits in the backpack
         max_weight = 0
         result = None
-        for i in items_with_food_prioritized:
+        for i in items_with_highest_priority:
             if i.weight > max_weight and i.weight + self.used_weight <= self.weight_limit:
                 max_weight = i.weight
                 result = i
