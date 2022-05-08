@@ -35,14 +35,14 @@ class ListOfItems(list):
             return j
 
 
-class BackPack(abc.ABC):
+class BackPack:
     def __init__(self, weight_limit, i):
         self.item_list = i
         self.used_weight = 0
         self.weight_limit = weight_limit
         self.packed_items = []
 
-    @abc.abstractmethod
+    # needs to be implemented by subclass
     def _get_next_item(self) -> Item:
         pass
 
@@ -100,8 +100,8 @@ def test1():
 
 def test2():
     item_list = ListOfItems.loadFromCSV()
-    random_bp = RandomBackPack(2000, item_list.copy())
-    optimal_bp = OptimalBackPack(2000, item_list.copy())
+    random_bp = RandomBackPack(2050, item_list.copy())
+    optimal_bp = OptimalBackPack(2050, item_list.copy())
     random_bp.pack()
     optimal_bp.pack()
     random_bp.getPackedItems().to_json("RandomBackpack.test2.json")
@@ -130,10 +130,10 @@ def test3():
 
 
 # Test 1: check if all items get put into the backpack if enough space
-# test1()
+test1()
 
 # Test 2: check with constrained weight limit how good the backpack gets filled
-# test2()
+test2()
 
 # Test 3: check if the backpack gets packed with the right priority
 test3()
