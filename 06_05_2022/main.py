@@ -119,10 +119,28 @@ def test2():
     print("======")
 
 
+def test3():
+    item_list = ListOfItems.loadFromCSV()
+    random_bp = RandomBackPack(2000, item_list.copy())
+    optimal_bp = OptimalBackPack(2000, item_list.copy())
+    random_bp.pack()
+    optimal_bp.pack()
+    random_bp.getPackedItems().to_json("RandomBackpack.test2.json")
+    optimal_bp.getPackedItems().to_json("OptimalBackpack.test2.json")
+    print("======")
+    print("TEST 2")
+    print("RandomBackpack\n\tfill-rate: {:.0%}".format(random_bp.used_weight / random_bp.weight_limit))
+    print("OptimalBackpack\n\tfill-rate: {:.0%}".format(optimal_bp.used_weight / optimal_bp.weight_limit))
+    print("======")
+
+
 # Test 1: check if all items get put into the backpack if enough space
 test1()
 
 # Test 2: check with constrained weight limit how good the backpack gets filled
 test2()
+
+# Test 3: check if the backpack gets packed with the right priority
+test3()
 
 # TODO more tests
