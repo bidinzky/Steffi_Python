@@ -1,7 +1,6 @@
 import csv
 import json
 import random
-import abc
 
 
 class Item:
@@ -47,12 +46,17 @@ class BackPack:
         pass
 
     def pack(self):
+        # while still space in backpack and there are items that can be put into it
         while self.used_weight < self.weight_limit and len(self.item_list) != 0:
+            # get next item (override from subclass)
             item = self._get_next_item()
+            # if there is a next time, and it fits into the backpack
             if item is not None and item.weight + self.used_weight <= self.weight_limit:
-                # still enough space in backpack
+                # add it to the packed items
                 self.packed_items.append(item)
+                # increase the used weight
                 self.used_weight += item.weight
+                # remove it from the item-list, so it only gets added one time
                 self.item_list.remove(item)
             else:
                 # not enough space, abort
@@ -69,10 +73,11 @@ class RandomBackPack(BackPack):
 
 class OptimalBackPack(BackPack):
     def _get_next_item(self):
-        # sort by priority and is_food
+        # sort by priority and is_food and weight as last
         items_with_priority = sorted(self.item_list, key=lambda i: (i.priority, i.is_food, i.weight), reverse=True)
         # now get the item with the highest weight that fits in the backpack
         items_with_priority_fits = filter(lambda i: i.weight + self.used_weight <= self.weight_limit, items_with_priority)
+        # get the first item in the list or None if it doesn't exist
         result = next(items_with_priority_fits, None)
         return result
 
@@ -137,5 +142,3 @@ test2()
 
 # Test 3: check if the backpack gets packed with the right priority
 test3()
-
-# TODO more tests
