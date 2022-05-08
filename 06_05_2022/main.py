@@ -14,22 +14,21 @@ class Item:
         return f"{self.priority} -> {self.name}: {self.weight} {self.is_food}"
 
 
-class ListOfItems(list):
-    def __init__(self, i):
-        super().__init__(i)
+class ListOfItems:
+    def __init__(self, default=None):
+        if default is None:
+            default = []
+        self.items = default
 
-    @staticmethod
-    def loadFromCSV(filename="Rucksack.csv"):
-        items = []
+    def loadFromCSV(self, filename="Rucksack.csv"):
         with open(filename) as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
-                items.append(Item(row["name"], float(row["weight"]), bool(int(row["is_food"])), int(row["priority"])))
-        return ListOfItems(items)
+                self.items.append(Item(row["name"], float(row["weight"]), bool(int(row["is_food"])), int(row["priority"])))
 
     def to_json(self, filename="Rucksack.json"):
         with open(filename, "w") as jsonfile:
-            j = json.dumps([ob.__dict__ for ob in self])
+            j = json.dumps([ob.__dict__ for ob in self.items])
             jsonfile.write(j)
             return j
 
@@ -47,7 +46,7 @@ class BackPack:
 
     def pack(self):
         # while still space in backpack and there are items that can be put into it
-        while self.used_weight < self.weight_limit and len(self.item_list) != 0:
+        while self.used_weight < self.weight_limit and len(self.item_list.items) != 0:
             # get next item (override from subclass)
             item = self._get_next_item()
             # if there is a next time, and it fits into the backpack
@@ -57,7 +56,7 @@ class BackPack:
                 # increase the used weight
                 self.used_weight += item.weight
                 # remove it from the item-list, so it only gets added one time
-                self.item_list.remove(item)
+                self.item_list.items.remove(item)
             else:
                 # not enough space, abort
                 break
@@ -68,13 +67,14 @@ class BackPack:
 
 class RandomBackPack(BackPack):
     def _get_next_item(self):
-        return random.choice(self.item_list)
+        return random.choice(self.item_list.items)
 
 
 class OptimalBackPack(BackPack):
     def _get_next_item(self):
         # sort by priority and is_food and weight as last
-        items_with_priority = sorted(self.item_list, key=lambda i: (i.priority, i.is_food, i.weight), reverse=True)
+        # https://stackoverflow.com/questions/20145842/python-sorting-by-multiple-criteria
+        items_with_priority = sorted(self.item_list.items, key=lambda i: (i.priority, i.is_food, i.weight), reverse=True)
         # now get the item with the highest weight that fits in the backpack
         items_with_priority_fits = filter(lambda i: i.weight + self.used_weight <= self.weight_limit, items_with_priority)
         # get the first item in the list or None if it doesn't exist
@@ -82,16 +82,22 @@ class OptimalBackPack(BackPack):
         return result
 
 
+def get_ListOfItems():
+    item_list = ListOfItems()
+    item_list.loadFromCSV()
+    return item_list
+
+
 def test1_evaluateBP(name, bp, item_list):
     print(f"{name}")
     print("\tfill-rate: {:.0%}".format(bp.used_weight / bp.weight_limit))
-    print(f"\tcontains all items: {set(item_list) == set(bp.packed_items)}")
+    print(f"\tcontains all items: {set(item_list.items) == set(bp.packed_items)}")
 
 
 def test1():
-    item_list = ListOfItems.loadFromCSV()
-    random_bp = RandomBackPack(2550, item_list.copy())
-    optimal_bp = OptimalBackPack(2550, item_list.copy())
+    item_list = get_ListOfItems()
+    random_bp = RandomBackPack(2550, get_ListOfItems())
+    optimal_bp = OptimalBackPack(2550, get_ListOfItems())
     random_bp.pack()
     optimal_bp.pack()
     random_bp.getPackedItems().to_json("RandomBackpack.test1.json")
@@ -104,9 +110,8 @@ def test1():
 
 
 def test2():
-    item_list = ListOfItems.loadFromCSV()
-    random_bp = RandomBackPack(2050, item_list.copy())
-    optimal_bp = OptimalBackPack(2050, item_list.copy())
+    random_bp = RandomBackPack(2050, get_ListOfItems())
+    optimal_bp = OptimalBackPack(2050, get_ListOfItems())
     random_bp.pack()
     optimal_bp.pack()
     random_bp.getPackedItems().to_json("RandomBackpack.test2.json")
@@ -119,9 +124,8 @@ def test2():
 
 
 def test3():
-    item_list = ListOfItems.loadFromCSV()
-    random_bp = RandomBackPack(1500, item_list.copy())
-    optimal_bp = OptimalBackPack(1500, item_list.copy())
+    random_bp = RandomBackPack(1500, get_ListOfItems())
+    optimal_bp = OptimalBackPack(1500, get_ListOfItems())
     random_bp.pack()
     optimal_bp.pack()
     random_bp.getPackedItems().to_json("RandomBackpack.test3.json")
@@ -129,10 +133,24 @@ def test3():
     print("======")
     print("TEST 3")
     print("BackPack should be: [cereal_bar, waterbottle, snacks]")
-    print(f"RandomBackpack\n\t {random_bp.getPackedItems()}")
-    print(f"OptimalBackpack\n\t {optimal_bp.getPackedItems()}")
+    print(f"RandomBackpack\n\t {random_bp.getPackedItems().items}")
+    print(f"OptimalBackpack\n\t {optimal_bp.getPackedItems().items}")
     print("======")
 
+
+def test4():
+    random_bp = RandomBackPack(1550, get_ListOfItems())
+    optimal_bp = OptimalBackPack(1550, get_ListOfItems())
+    random_bp.pack()
+    optimal_bp.pack()
+    random_bp.getPackedItems().to_json("RandomBackpack.test4.json")
+    optimal_bp.getPackedItems().to_json("OptimalBackpack.test4.json")
+    print("======")
+    print("TEST 4")
+    print("BackPack should be: [cereal_bar, waterbottle, snacks, inhaler]")
+    print(f"RandomBackpack\n\t {random_bp.getPackedItems().items}")
+    print(f"OptimalBackpack\n\t {optimal_bp.getPackedItems().items}")
+    print("======")
 
 # Test 1: check if all items get put into the backpack if enough space
 test1()
@@ -142,3 +160,5 @@ test2()
 
 # Test 3: check if the backpack gets packed with the right priority
 test3()
+
+test4()
