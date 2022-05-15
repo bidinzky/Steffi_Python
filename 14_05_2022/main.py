@@ -1,3 +1,4 @@
+import csv
 import datetime
 import sqlite3
 import statistics
@@ -74,6 +75,9 @@ class SensorValueController:
             vals = self.__filter_range(vals, range_min, range_max)
 
         fn = min if is_min else max
+
+        if len(vals) == 0:
+            return None
         return fn(vals, key=lambda sv: sv.temp)
 
     @staticmethod
@@ -85,14 +89,25 @@ class SensorValueController:
         return list(filter(lambda sv: r_min <= sv.time <= r_max, vals))
 
 
+def loadFromCSV(svc: SensorValueController, filename="data.csv"):
+    with open(filename) as csvfile:
+        reader = csv.DictReader(csvfile, delimiter=";")
+        for row in reader:
+            svc.add_sensor_value(
+                SensorValue(float(row["temperature"]),
+                            datetime.datetime.strptime(row["timestamp"], '%Y-%m-%dT%H:%M:%S'), int(row["sensorid"])))
+
+
 svc = SensorValueController("sqlite.db")
 svc.clear_table()
-svc.add_sensor_value(SensorValue(13.3, datetime.datetime(2020, 5, 9), 1))
-svc.add_sensor_value(SensorValue(14.3, datetime.datetime(2020, 5, 10), 1))
-svc.add_sensor_value(SensorValue(15.3, datetime.datetime(2020, 5, 11), 1))
-svc.add_sensor_value(SensorValue(13.0, datetime.datetime(2020, 5, 9), 2))
-svc.add_sensor_value(SensorValue(14.0, datetime.datetime(2020, 5, 10), 2))
-svc.add_sensor_value(SensorValue(15.0, datetime.datetime(2020, 5, 11), 2))
+loadFromCSV(svc, "data.csv")
+
+#svc.add_sensor_value(SensorValue(13.3, datetime.datetime(2020, 5, 9), 1))
+#svc.add_sensor_value(SensorValue(14.3, datetime.datetime(2020, 5, 10), 1))
+#svc.add_sensor_value(SensorValue(15.3, datetime.datetime(2020, 5, 11), 1))
+#svc.add_sensor_value(SensorValue(13.0, datetime.datetime(2020, 5, 9), 2))
+#svc.add_sensor_value(SensorValue(14.0, datetime.datetime(2020, 5, 10), 2))
+#svc.add_sensor_value(SensorValue(15.0, datetime.datetime(2020, 5, 11), 2))
 # test all
 print("====")
 print(svc.min())
