@@ -1,0 +1,1 @@
+[{"name": "waterbottle", "weight": 1000.0, "is_food": true, "priority": 3}, {"name": "binoculars", "weight": 500.0, "is_food": false, "priority": 1}, {"name": "suncream", "weight": 40.0, "is_food": false, "priority": 3}]
