@@ -1,6 +1,4 @@
 import sqlite3
-from datetime import datetime
-
 import requests
 
 
@@ -28,16 +26,6 @@ class DbManager:
         self.conn.execute("""INSERT or REPLACE INTO Temperature(time, temperature) VALUES (?,?)""", (db_value.date, db_value.temp))
         self.conn.commit()
 
-    def __read_table(self):
-        results = []
-        # select all values and fetchall
-        for r in self.conn.execute("SELECT * from Temperature").fetchall():
-            # deconstruct tuple
-            (temp, time) = r
-            # create SensorValue add to result list
-            results.append(DbValue(datetime.strptime(time, '%Y-%m-%d %H:%M:%S'), temp))
-        return results
-
     def __create_connection(self, db_file):
         try:
             self.conn = sqlite3.connect(db_file)
@@ -50,8 +38,10 @@ def load_weather_data(lat, long):
         f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={long}&hourly=temperature_2m").json()["hourly"]
     templist = hourly["temperature_2m"]
     timelist = hourly["time"]
+    result = []
     for (time, temp) in zip(timelist, templist):
-        yield DbValue(time, temp)
+        result.append(DbValue(time, temp))
+    return result
 
 
 db = DbManager("sqlite.db")
