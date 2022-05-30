@@ -1,22 +1,40 @@
 import random
 
 
+###
+# TLDR: The  game of life problem gets split into 3 problems
+#       1. the Board:
+#                    - defines the game Board (like a chess board)
+#                    - is able to get to the next state (cells die or get born based on the rules)
+#       2. the Cell: implements a simple Cell with some attributes
+#                    is_alive defines if there is a living cell (dead and no cell is same)
+#                    _age is an example of an attribute each time epoch the cell lives this gets incremented
+#                    possible extensions would be e.g. colour, shape, ...
+#       3. the Simulator: its job is to initialize the board and move it forward in time if needed and offers a simple CLI interface
+###
+
+
 class Cell:
     def __init__(self, is_alive, age=0):
         self.is_alive = is_alive
         self._age = age
 
+    # method that gets called when the cell lives another round --> age it or set it to 0 if the cell is dead
     def age(self):
         if self.is_alive:
             self._age += 1
         else:
             self._age = 0
 
+    # python method to define how an instance of the Cell class should be printed
+    # in this case it should print the age if the cell is alive otherwise it prints a space character
     def __repr__(self):
         return f"{self._age}" if self.is_alive else " "
 
 
 class Board:
+    # Constructor for the Board, size is the number of cells per side so 4 => 4x4 board
+    # alive_threshold defines how many percent of the initial cells should be alive
     def __init__(self, size=4, alive_threshold=0.5):
         self.size = size
         self.board = [[Cell(random.random() >= alive_threshold) for _ in range(size)] for _ in range(size)]
@@ -74,9 +92,9 @@ class Simulator:
     def handle(self):
         i = 0
         while True:
-            if input("") == "c": # wait for input, if input is c --> break out of loop
+            if input("") == "c":  # wait for input, if input is c --> break out of loop
                 break
-            i+=1
+            i += 1
             print(f"epoch {i}")
             self.board.calculate_next_step()
             print(self.board)
